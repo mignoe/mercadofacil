@@ -51,6 +51,8 @@ public class ProdutoAlterarServiceTest {
                         .preco(500.00)
                         .build()
                 );
+
+        Mockito.when(produtoRepository.)
     }
 
     @Test
@@ -72,14 +74,25 @@ public class ProdutoAlterarServiceTest {
         //Arrange
         produto.setPreco(0.00);
         //Act
-        Produto resultado = driver.alterar(produto);
-        //Assert
+
         RuntimeException thrown = assertThrows(
           RuntimeException.class,
                 () -> driver.alterar(produto)
         );
 
+        //Assert
         assertEquals("Preço inválido", thrown.getMessage());
     }
 
+    @Test
+    @DisplayName("Quando o código de barras é válido")
+    void mudarCodigoDeBarras () {
+        /* AAA */
+        //Arrange
+        produto.setCodigoBarra("4012345678901");
+        //Act
+        driver.alterar(produto);
+        //Assert
+        assertEquals(driver.())
+    }
 }
