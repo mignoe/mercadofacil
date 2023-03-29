@@ -52,7 +52,7 @@ public class ProdutoAlterarServiceTest {
                         .build()
                 );
 
-        Mockito.when(produtoRepository.)
+        // Mockito.when(produtoRepository.)
     }
 
     @Test
@@ -91,8 +91,25 @@ public class ProdutoAlterarServiceTest {
         //Arrange
         produto.setCodigoBarra("4012345678901");
         //Act
-        driver.alterar(produto);
+        Produto resultado = driver.alterar(produto);
         //Assert
-        assertEquals(driver.())
+        assertEquals(resultado.getCodigoBarra(), "4012345678901");
+    }
+
+    @Test
+    @DisplayName("Quando o código de barras é inválido")
+    void mudarCodigoDeBarrasParaInvalido () {
+        /* AAA */
+        //Arrange
+        // O dígito de verificação está errado.
+        produto.setCodigoBarra("4012345678902");
+        //Act
+        RuntimeException thrown = assertThrows(
+                RuntimeException.class,
+                () -> driver.alterar(produto)
+        );
+
+        //Assert
+        assertEquals("Código de barras inválido", thrown.getMessage());
     }
 }
