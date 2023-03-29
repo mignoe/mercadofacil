@@ -97,12 +97,76 @@ public class ProdutoAlterarServiceTest {
     }
 
     @Test
-    @DisplayName("Quando o código de barras é inválido")
-    void mudarCodigoDeBarrasParaInvalido () {
+    @DisplayName("Quando o código de barras é inválido (dígito de verificação errado)")
+    void mudarCodigoDeBarrasParaDigitoDeVerificacaoInvalido () {
         /* AAA */
         //Arrange
         // O dígito de verificação está errado.
         produto.setCodigoBarra("4012345678902");
+        //Act
+        RuntimeException thrown = assertThrows(
+                RuntimeException.class,
+                () -> driver.alterar(produto)
+        );
+
+        //Assert
+        assertEquals("Código de barras inválido", thrown.getMessage());
+    }
+
+    @Test
+    @DisplayName("Quando o código de barras é inválido (número de dígitos menor que 13)")
+    void mudarCodigoDeBarrasParaTamanhoMenor () {
+        /* AAA */
+        //Arrange
+
+        produto.setCodigoBarra("406");
+        //Act
+        RuntimeException thrown = assertThrows(
+                RuntimeException.class,
+                () -> driver.alterar(produto)
+        );
+
+        //Assert
+        assertEquals("Código de barras inválido", thrown.getMessage());
+    }
+
+    @Test
+    @DisplayName("Quando o código de barras é inválido (número de dígitos maior que 13)")
+    void mudarCodigoDeBarrasParaTamanhoMaior () {
+        /* AAA */
+        //Arrange
+        // Codigo de verificação também estaria errado
+        produto.setCodigoBarra("1234567891011123");
+        //Act
+        RuntimeException thrown = assertThrows(
+                RuntimeException.class,
+                () -> driver.alterar(produto)
+        );
+
+        //Assert
+        assertEquals("Código de barras inválido", thrown.getMessage());
+
+        /* AAA */
+        //Arrange
+        // Codigo de verificação correto (considerando os 13 primeiros dígitos).
+        produto.setCodigoBarra("1234567891015123");
+        //Act
+        RuntimeException thrown2 = assertThrows(
+                RuntimeException.class,
+                () -> driver.alterar(produto)
+        );
+
+        //Assert
+        assertEquals("Código de barras inválido", thrown.getMessage());
+    }
+
+    @Test
+    @DisplayName("Quando o código de barras é inválido (número de dígitos maior que 13)")
+    void mudarCodigoDeBarrasParaTamanhoZero () {
+        /* AAA */
+        //Arrange
+        // Codigo de verificação também estaria errado
+        produto.setCodigoBarra("");
         //Act
         RuntimeException thrown = assertThrows(
                 RuntimeException.class,
