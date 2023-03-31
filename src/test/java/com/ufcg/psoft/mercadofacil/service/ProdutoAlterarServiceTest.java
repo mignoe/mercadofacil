@@ -161,7 +161,7 @@ public class ProdutoAlterarServiceTest {
     }
 
     @Test
-    @DisplayName("Quando o código de barras é inválido (número de dígitos maior que 13)")
+    @DisplayName("Quando o código de barras é inválido (número de dígitos é 0 que é diferente de 13)")
     void mudarCodigoDeBarrasParaTamanhoZero () {
         /* AAA */
         //Arrange
