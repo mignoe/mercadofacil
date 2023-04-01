@@ -3,13 +3,13 @@ package com.ufcg.psoft.mercadofacil.repository;
 import com.ufcg.psoft.mercadofacil.model.Lote;
 import com.ufcg.psoft.mercadofacil.model.Produto;
 import com.ufcg.psoft.mercadofacil.repository.VolatilLoteRepository;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+
+import java.util.ArrayList;
+import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -71,6 +71,7 @@ class VolatilLoteRepositoryTest {
     @Test
     @DisplayName("Adicionar o primeiro Lote no repositorio de dados")
     void salvarPrimeiroLote() {
+
         resultado = driver.save(lote);
 
         assertEquals(driver.findAll().size(),1);
@@ -92,6 +93,25 @@ class VolatilLoteRepositoryTest {
     }
 
     @Test
+    @DisplayName("Dar update em lote")
+    void updateEmLote() {
+
+        driver.save(loteExtra);
+        driver.save(lote);
+
+        Lote updatedLote = Lote.builder()
+                .id(1L)
+                .numeroDeItens(25)
+                .produto(produtoExtra)
+                .build();
+
+        driver.update(updatedLote);
+
+        assertEquals(driver.find(lote.getId()), updatedLote);
+        assertEquals(driver.findAll().size(),2);
+    }
+
+    @Test
     @DisplayName("Dar update em lote inexistente")
     void updateEmLoteInexistente() {
 
@@ -110,6 +130,16 @@ class VolatilLoteRepositoryTest {
         driver.save(loteExtra);
 
         driver.delete(lote);
+
+        assertEquals(driver.findAll().size(),1);
+    }
+
+    @Test
+    @DisplayName("Delete de um lote que não está no repositório")
+    void deleteDeUmLoteInexistente() {
+        driver.save(lote);
+
+        driver.delete(loteExtra);
 
         assertEquals(driver.findAll().size(),1);
     }
@@ -171,5 +201,114 @@ class VolatilLoteRepositoryTest {
         driver.delete(loteExtra);
 
         assertEquals(driver.findAll().size(), 0);
+    }
+
+    @Test
+    @DisplayName("Deletando tudo de um repositório vazio")
+    void deleteAllRepositorioVazio(){
+        driver.deleteAll();
+
+        assertEquals(driver.findAll().size(), 0);
+    }
+
+    @Test
+    @DisplayName("Adicionando lotes com o mesmo id")
+    void adicionaLotesComMesmoId() {
+        Lote lote1 = Lote.builder()
+                .id(3L)
+                .numeroDeItens(50)
+                .produto(produto)
+                .build();
+
+        Lote lote2 = Lote.builder()
+                .id(3L)
+                .numeroDeItens(25)
+                .produto(produtoExtra)
+                .build();
+
+        driver.save(lote1);
+        driver.save(lote2);
+
+        assertEquals(driver.find(lote2.getId()), lote2);
+    }
+
+    @Test
+    @DisplayName("Colocando null no repositório")
+    void saveNull() {
+        RuntimeException thrown = assertThrows(
+                RuntimeException.class,
+                () -> driver.save(null)
+        );
+
+        assertEquals(thrown.getMessage(), "Lote nulo");
+
+    }
+
+    @Nested
+    class MultipleLotes {
+        ArrayList<Lote> lotes = new ArrayList<>();
+
+        @BeforeEach
+        void setUpMultiplosLotes() {
+            long[] ids = new long[] {2, 4, 90, 30, 5};
+            for (long num : ids ) {
+                Lote loteNovo = Lote.builder()
+                        .id(num)
+                        .numeroDeItens((int) (5 * num))
+                        .produto(produto)
+                        .build();
+
+                lotes.add(loteNovo);
+            }
+        }
+
+        @Test
+        @DisplayName("Teste de salvamento de múltiplos lotes")
+        void testSaveDeMultiplosLotes() {
+            for (Lote lote : lotes ) {
+                driver.save(lote);
+            }
+
+            assertEquals(driver.findAll().size(), lotes.size());
+        }
+
+        @Test
+        @DisplayName("Teste de salvamento e remoção de múltiplos lotes")
+        void testSaveEDeleteDeMultiplosLotes() {
+            for (Lote lote : lotes ) {
+                driver.save(lote);
+            }
+
+            int numeroARemover = 3;
+            for(int i = 0; i < numeroARemover; i++) {
+                driver.delete(lotes.get(i));
+            }
+
+            assertEquals(driver.findAll().size(), lotes.size() - numeroARemover);
+        }
+
+        @Test
+        @DisplayName("Teste de salvamento e recuperação individual de múltiplos lotes")
+        void testSaveEFindDeMultiplosLotes() {
+            for (Lote lote : lotes ) {
+                driver.save(lote);
+            }
+
+            for(int i = 0; i < lotes.size(); i++) {
+                assertEquals(driver.find(lotes.get(i).getId()),
+                                lotes.get(i));
+            }
+        }
+
+        @Test
+        @DisplayName("Teste de salvamento e recuperação coletiva de múltiplos lotes")
+        void testSaveEFindAllDeMultiplosLotes() {
+            for (Lote lote : lotes ) {
+                driver.save(lote);
+            }
+
+            assertEquals(new HashSet<Lote> (driver.findAll()),
+                            new HashSet<Lote> (lotes));
+        }
     }
 }
